@@ -6,17 +6,85 @@
 
 This is a full-stack web-app boilerplate starter.
 
-This is a [Next.js 14](https://nextjs.org/) web-app using the `app directory`, [Tailwind CSS](https://tailwindcss.com/), TypeScript, Google's [Firebase](https://firebase.google.com/) and [Zustand](https://docs.pmnd.rs/zustand/getting-started/introduction) for state management.
+This is a [Next.js 14](https://nextjs.org/) web-app using the `app directory`, [Tailwind CSS](https://tailwindcss.com/), TypeScript, Google's [Firebase](https://firebase.google.com/) SDK and [Zustand](https://docs.pmnd.rs/zustand/getting-started/introduction) for state management.
 
-This starter uses the Firebase SDK for authentication and includes functioning Sign Up _(email, password, and username)_, Login and Forgot Password pages. Once a user is logged in, user data _(uid, email, and username)_ is synced with the state management store and persisted using cookies 🍪 to maintain the login state across page refreshes.
+## 🔔 Features
 
-Once logged in, users are redirected to a profile page where there is a functioning Log Out button and a link to a Profile Settings page where updates to the user profile details _(username, email, and password)_ can be made.
+### 🔐 Auth
 
-## 💻 Getting Started
+- Fully functional **Sign Up** _(email, password, and username)_, **Login** and **Forgot Password** pages
 
-- Create & register a Firebase app
+### 👤 Profile
+
+- A protected user **Profile Page** where profile details and posts are displayed, has links to other pages and a _Log Out_ button
+- A **Profile Settings Page** where details _(email, password, username and profile image)_ can be managed
+
+### 📝 Posts
+
+- A **Create Post Page** that includes fields for _Title, Description, Images, Location, Tags,_ and _Price_
+- A dynamic **Edit Post Page** (based on post ID) where all post attributes can be managed
+
+### 🐻 State Management
+
+- The Zustand store syncs the frontend to the backend databases and provides a cookie 🍪 to maintain auth state
+
+## 🏃‍➡️ Getting Started
+
+- Create & Register a Firebase App
+  - From Firebase Console, "Add project" and follow setup steps
+  - From "Project Settings", register the web-app to get credentials
 - Rename `.env.example` to `.env.local`
 - Add project environment variables
+- Create Firestore Database:
+
+  - Create Firestore Collection `posts`
+
+    - Define data structure:
+      ```
+      title: string
+      description: string
+      tags: array of strings
+      images: array of strings (URLs to the uploaded images)
+      userId: string (reference to the user who created the post)
+      createdAt: timestamp
+      location: string
+      geoPoint: geopoint
+      price: string
+      ```
+    - Update Firestore Database Rules:
+
+      ```json
+      rules_version = '2';
+
+      service cloud.firestore {
+        match /databases/{database}/documents {
+            match /users/{userId} {
+                allow read, write: if request.auth != null && request.auth.uid == userId;
+            }
+            match /posts/{postId} {
+                allow read: if true;
+                allow write: if request.auth != null && request.auth.uid == request.resource.data.userId;
+                allow delete: if request.auth != null && request.auth.uid == resource.data.userId;
+            }
+        }
+      }
+      ```
+
+- Create Firebase Storage (Images) - Update Storage Rules:
+
+  ```json
+    service firebase.storage {
+        match /b/{bucket}/o {
+            match /{allPaths=**} {
+            allow read: if true;
+            allow write: if request.auth != null;
+            }
+        }
+    }
+  ```
+
+### 💻 Local Development
+
 - Install dependencies
 
 ```bash
