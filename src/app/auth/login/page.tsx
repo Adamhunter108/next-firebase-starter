@@ -5,10 +5,11 @@ import {
   signInWithEmailAndPassword,
   User as FirebaseUser,
 } from "firebase/auth";
-import { auth } from "../../../firebase/firebaseConfig";
+import { auth, db } from "../../../firebase/firebaseConfig";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import useStore from "@/store";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 
 export default function LoginPage() {
   const [email, setEmail] = useState<string>("");
@@ -32,7 +33,24 @@ export default function LoginPage() {
       );
       const user = userCredential.user;
 
-      setUser(user);
+      // Fetch additional user details from Firestore if available
+      const userDocRef = doc(db, "users", user.uid); // Create a reference to the user document
+      const userDoc = await getDoc(userDocRef);
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        setUser({
+          ...user,
+          profilePicture: userData?.profilePicture || null,
+        });
+      } else {
+        // Create user document if it doesn't exist
+        await setDoc(userDocRef, {
+          email: user.email,
+          displayName: user.displayName,
+          profilePicture: null,
+        });
+        setUser(user);
+      }
 
       setError(null);
       router.push("/profile");
@@ -108,7 +126,7 @@ export default function LoginPage() {
               </div>
 
               <div className="flex items-center justify-between">
-                <div className="flex items-center">
+                {/* <div className="flex items-center">
                   <input
                     id="remember-me"
                     name="remember-me"
@@ -121,7 +139,7 @@ export default function LoginPage() {
                   >
                     Remember me
                   </label>
-                </div>
+                </div> */}
 
                 <div className="text-sm leading-6">
                   <Link
