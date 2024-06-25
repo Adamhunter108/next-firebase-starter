@@ -53,7 +53,7 @@ This is a [Next.js 14](https://nextjs.org/) web-app using the `app directory`, [
       ```
     - Update Firestore Database Rules:
 
-      ```json
+      ```
       rules_version = '2';
 
       service cloud.firestore {
@@ -72,7 +72,7 @@ This is a [Next.js 14](https://nextjs.org/) web-app using the `app directory`, [
 
 - Create Firebase Storage (Images) - Update Storage Rules:
 
-  ```json
+  ```
     service firebase.storage {
         match /b/{bucket}/o {
             match /{allPaths=**} {
