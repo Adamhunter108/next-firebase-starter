@@ -5,6 +5,8 @@ import {
   setPersistence,
   browserLocalPersistence,
 } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -16,12 +18,16 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
+// Initialize Firebase only if it hasn't been initialized yet
 if (!getApps().length) {
   initializeApp(firebaseConfig);
 }
 
 const auth = getAuth();
+const db = getFirestore();
+const storage = getStorage();
 
+// Set persistence to browser local storage
 setPersistence(auth, browserLocalPersistence)
   .then(() => {
     console.log("Persistence set to local storage");
@@ -38,4 +44,4 @@ const logout = async () => {
   }
 };
 
-export { auth, logout };
+export { auth, db, storage, logout };
