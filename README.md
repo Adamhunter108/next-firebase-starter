@@ -70,7 +70,9 @@ This is a [Next.js 14](https://nextjs.org/) web-app using the `app directory`, [
       }
       ```
 
-- Create Firebase Storage (Images) - Update Storage Rules:
+- Create Firebase Storage (Images)
+
+  - Update Storage Rules:
 
   ```
     service firebase.storage {
