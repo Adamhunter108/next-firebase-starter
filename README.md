@@ -16,13 +16,15 @@ This is a [Next.js 14](https://nextjs.org/) web-app using the `app directory`, [
 
 ### 👤 Profile
 
-- A protected user **Profile Page** where profile details and posts are displayed, has links to other pages and a _Log Out_ button
+- A protected user **Profile Page** where profile details and created posts are displayed, has links to other pages and a _Log Out_ button
 - A **Profile Settings Page** where details _(email, password, username and profile image)_ can be managed
 
 ### 📝 Posts
 
-- A **Create Post Page** that includes fields for _Title, Description, Images, Location, Tags,_ and _Price_
-- A dynamic **Edit Post Page** (based on post ID) where all post attributes can be managed
+- A **Create Post Page** for authenticated users that includes fields for _Title, Description, Images, Location, Tags,_ and _Price_
+- A dynamic **Edit Post Page** (based on post ID) where all post attributes can be managed by the author
+- A public **Posts Page** where all user generated posts are fetched and displayed
+- A dynamic **Post Page** for individual posts
 
 ### 🐻 State Management
 
