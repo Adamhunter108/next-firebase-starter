@@ -17,7 +17,7 @@ interface Post {
   createdAt: any;
   price: string;
   profilePicture?: string;
-  username?: string; // Added username to the interface
+  username?: string;
 }
 
 export default function PostPage() {
@@ -29,7 +29,7 @@ export default function PostPage() {
     const fetchPost = async () => {
       if (!id) return;
       try {
-        const postDoc = await getDoc(doc(db, "posts", id as string)); // Cast id to string
+        const postDoc = await getDoc(doc(db, "posts", id as string));
         if (postDoc.exists()) {
           const postData = postDoc.data() as Post;
           const userDoc = await getDoc(doc(db, "users", postData.userId));
@@ -38,7 +38,7 @@ export default function PostPage() {
             ...postData,
             id: postDoc.id,
             profilePicture: userData?.profilePicture || null,
-            username: userData?.displayName || "Unknown User", // Added username
+            username: userData?.displayName || "Unknown User",
           });
         } else {
           console.error("No such document!");
@@ -60,8 +60,6 @@ export default function PostPage() {
   if (!post) {
     return <p>No post found.</p>;
   }
-
-  console.log(post);
 
   return (
     <div className="mx-6 mt-6">

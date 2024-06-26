@@ -32,24 +32,20 @@ export default function PostsPage() {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        // console.log("Fetching posts...");
         const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
         const querySnapshot = await getDocs(q);
 
         if (querySnapshot.empty) {
-          //   console.log("No posts found.");
         } else {
           const postsData: Post[] = await Promise.all(
             querySnapshot.docs.map(async (postDoc) => {
               const postData = postDoc.data() as Post;
-              //   console.log("Post data:", postData);
 
               if (postData.userId) {
                 try {
                   const userDocRef = firestoreDoc(db, "users", postData.userId);
                   const userDoc = await getDoc(userDocRef);
                   const userData = userDoc.data() || {};
-                  //   console.log("User data:", userData);
 
                   return {
                     ...postData,
@@ -65,7 +61,7 @@ export default function PostsPage() {
                   };
                 }
               } else {
-                // console.warn("Post missing userId:", postData);
+                console.warn("Post missing userId:", postData);
                 return {
                   ...postData,
                   id: postDoc.id,
@@ -75,7 +71,6 @@ export default function PostsPage() {
             })
           );
           setPosts(postsData);
-          //   console.log("Posts data:", postsData);
         }
       } catch (error) {
         console.error("Error fetching posts:", error);
@@ -90,8 +85,6 @@ export default function PostsPage() {
   if (loading) {
     return <p>Loading...</p>;
   }
-
-  //   console.log("Posts:", posts);
 
   return (
     <div className="mx-6 mt-6">
