@@ -55,19 +55,18 @@ This is a [Next.js 14](https://nextjs.org/) web-app using the `app directory`, [
 
       ```
         rules_version = '2';
-
         service cloud.firestore {
-            match /databases/{database}/documents {
-                match /users/{userId} {
-                    allow read: if request.auth != null;
-                    allow write: if request.auth != null && request.auth.uid == userId;
-                }
-                match /posts/{postId} {
-                    allow read: if true;
-                    allow write: if request.auth != null && request.auth.uid == request.resource.data.userId;
-                    allow delete: if request.auth != null && request.auth.uid == resource.data.userId;
-                }
+        match /databases/{database}/documents {
+            match /users/{userId} {
+            allow read: if true;
+            allow write: if request.auth != null && request.auth.uid == userId;
             }
+            match /posts/{postId} {
+            allow read: if true;
+            allow write: if request.auth != null && request.auth.uid == request.resource.data.userId;
+            allow delete: if request.auth != null && request.auth.uid == resource.data.userId;
+            }
+        }
         }
       ```
 
