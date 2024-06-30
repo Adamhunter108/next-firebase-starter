@@ -16,14 +16,18 @@ interface Post {
   userId: string;
   createdAt: any;
   price: string;
-  profilePicture?: string;
-  username?: string;
+}
+
+interface User {
+  displayName: string;
+  profilePicture?: string | null;
 }
 
 export default function PostPage() {
   const { id } = useParams();
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -32,16 +36,27 @@ export default function PostPage() {
         const postDoc = await getDoc(doc(db, "posts", id as string));
         if (postDoc.exists()) {
           const postData = postDoc.data() as Post;
-          const userDoc = await getDoc(doc(db, "users", postData.userId));
-          const userData = userDoc.data();
           setPost({
             ...postData,
             id: postDoc.id,
-            profilePicture: userData?.profilePicture || null,
-            username: userData?.displayName || "Unknown User",
           });
+
+          const userDoc = await getDoc(doc(db, "users", postData.userId));
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            console.log("User data:", userData);
+
+            setUser({
+              displayName: userData?.displayName,
+              profilePicture: userData?.profilePicture || null,
+            });
+          } else {
+            console.error(
+              `No user document found for userId: ${postData.userId}`
+            );
+          }
         } else {
-          console.error("No such document!");
+          console.error(`No post document found for id: ${id}`);
         }
       } catch (error) {
         console.error("Error fetching post:", error);
@@ -61,6 +76,9 @@ export default function PostPage() {
     return <p>No post found.</p>;
   }
 
+  console.log("Post data:", post);
+  console.log("User data:", user);
+
   return (
     <div className="mx-6 mt-6">
       <Link
@@ -71,14 +89,14 @@ export default function PostPage() {
       </Link>
       <h1 className="text-2xl font-bold">{post.title}</h1>
       <div className="flex items-center mt-4">
-        {post.profilePicture && (
+        {user?.profilePicture && (
           <img
-            src={post.profilePicture}
+            src={user.profilePicture}
             alt="Profile"
             className="w-10 h-10 rounded-full mr-4"
           />
         )}
-        <p className="text-lg font-semibold">{post.username}</p>
+        <p className="text-lg font-semibold">{user?.displayName}</p>
       </div>
       <div className="flex mt-4">
         {post.images.map((image, index) => (

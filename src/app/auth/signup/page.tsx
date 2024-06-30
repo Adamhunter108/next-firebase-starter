@@ -7,10 +7,11 @@ import {
   sendEmailVerification,
   User as FirebaseUser,
 } from "firebase/auth";
-import { auth } from "../../../firebase/firebaseConfig";
+import { auth, db } from "../../../firebase/firebaseConfig";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import useStore from "@/store";
+import { doc, setDoc, Timestamp } from "firebase/firestore";
 
 export default function SignupPage() {
   const [email, setEmail] = useState<string>("");
@@ -37,6 +38,15 @@ export default function SignupPage() {
       await updateProfile(userCredential.user, { displayName: username });
       await sendEmailVerification(userCredential.user);
       setUser(userCredential.user);
+
+      // Create user document in Firestore
+      await setDoc(doc(db, "users", userCredential.user.uid), {
+        displayName: username,
+        profilePicture: null,
+        email: userCredential.user.email,
+        createdAt: Timestamp.now(),
+      });
+
       setSuccess(
         "Sign up successful! Please check your email to verify your account."
       );
