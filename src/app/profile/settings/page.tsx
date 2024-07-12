@@ -47,6 +47,7 @@ export default function ProfileSettingsPage() {
   const [profilePicture, setProfilePicture] = useState<string | null>(null);
   const [newProfilePicture, setNewProfilePicture] = useState<File | null>(null);
   const [uploading, setUploading] = useState<boolean>(false);
+  const [bio, setBio] = useState<string>("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -64,6 +65,16 @@ export default function ProfileSettingsPage() {
     if (user?.profilePicture) {
       setProfilePicture(user.profilePicture);
     }
+    const fetchUserBio = async () => {
+      if (user?.uid) {
+        const userDocRef = doc(db, "users", user.uid);
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists()) {
+          setBio(userDoc.data()?.bio || "");
+        }
+      }
+    };
+    fetchUserBio();
   }, [user]);
 
   const handleUpdateProfile = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -87,6 +98,34 @@ export default function ProfileSettingsPage() {
         console.log("User Email:", currentUser.email);
         console.log("User Display Name:", currentUser.displayName);
 
+        // Check if email already exists
+        if (email !== currentUser.email) {
+          const emailQuery = query(
+            collection(db, "users"),
+            where("email", "==", email)
+          );
+          const emailSnapshot = await getDocs(emailQuery);
+
+          if (!emailSnapshot.empty) {
+            setError("Email is already taken. Please choose another one.");
+            return;
+          }
+        }
+
+        // Check if username already exists
+        if (username !== currentUser.displayName) {
+          const usernameQuery = query(
+            collection(db, "users"),
+            where("displayName", "==", username)
+          );
+          const usernameSnapshot = await getDocs(usernameQuery);
+
+          if (!usernameSnapshot.empty) {
+            setError("Username is already taken. Please choose another one.");
+            return;
+          }
+        }
+
         // Update display name
         if (username && currentUser.displayName !== username) {
           console.log("Updating display name...");
@@ -105,11 +144,24 @@ export default function ProfileSettingsPage() {
           await updatePassword(currentUser, password);
         }
 
+        // Update user document with bio
+        const userDocRef = doc(db, "users", currentUser.uid);
+        await updateDoc(userDocRef, {
+          displayName: username,
+          email: email,
+          bio: bio,
+        });
+
+        // Fetch the latest user data from Firestore
+        const updatedUserDoc = await getDoc(userDocRef);
+        const updatedUserData = updatedUserDoc.data();
+
         // Update Zustand state with the latest user data
         setUser({
           ...currentUser,
-          email: currentUser.email,
-          displayName: currentUser.displayName,
+          email: updatedUserData?.email,
+          displayName: updatedUserData?.displayName,
+          profilePicture: updatedUserData?.profilePicture,
         });
 
         setSuccess("Profile updated successfully.");
@@ -188,10 +240,10 @@ export default function ProfileSettingsPage() {
   };
 
   if (!user) {
-    return <p>Loading...</p>;
+    return <div>Loading...</div>;
   }
 
-  console.log(user);
+  // console.log(user);
 
   return (
     <div className="mx-6">
@@ -199,7 +251,7 @@ export default function ProfileSettingsPage() {
         href="/profile/"
         className="m-6 flex w-56 justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
       >
-        &#x25c0; Back to profile
+        &#x2039; Back to profile
       </Link>
       <h1 className="text-xl text-center">Profile Settings</h1>
       <p className="text-center mb-2">
@@ -214,7 +266,7 @@ export default function ProfileSettingsPage() {
               className="cursor-pointer rounded-full bg-white font-semibold text-indigo-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 hover:text-indigo-500 border-4 border-indigo-500"
             >
               <div className="flex justify-center">
-                <div className="h-24 w-24 bg-gradient-to-bl from-sky-200 via-indigo-200 to-indigo-500 rounded-full">
+                <div className="h-24 w-24 bg-gradient-to-bl from-sky-500 via-indigo-400 to-indigo-500 rounded-full outline outline-2 outline-offset-2 outline-indigo-500">
                   <img
                     src={profilePicture || "/images/profile-placeholder.png"}
                     alt="profile pic"
@@ -264,6 +316,26 @@ export default function ProfileSettingsPage() {
       <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-[480px]">
         <div className="bg-white px-6 py-12 shadow sm:rounded-lg sm:px-12">
           <form className="space-y-6" onSubmit={handleUpdateProfile}>
+            <div>
+              <label
+                htmlFor="bio"
+                className="block text-sm font-medium leading-6 text-gray-900"
+              >
+                Profile Bio
+              </label>
+              <div className="mt-2">
+                <textarea
+                  rows={3}
+                  id="bio"
+                  name="bio"
+                  placeholder="Hi, this is my public profile bio"
+                  value={bio}
+                  onChange={(e) => setBio(e.target.value)}
+                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                />
+              </div>
+            </div>
+
             <div>
               <label
                 htmlFor="email"

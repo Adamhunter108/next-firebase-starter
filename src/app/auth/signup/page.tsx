@@ -11,7 +11,15 @@ import { auth, db } from "../../../firebase/firebaseConfig";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import useStore from "@/store";
-import { doc, setDoc, Timestamp } from "firebase/firestore";
+import {
+  doc,
+  setDoc,
+  Timestamp,
+  getDocs,
+  query,
+  collection,
+  where,
+} from "firebase/firestore";
 
 export default function SignupPage() {
   const [email, setEmail] = useState<string>("");
@@ -30,6 +38,32 @@ export default function SignupPage() {
   const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
+      // Check if email already exists
+      const emailQuery = query(
+        collection(db, "users"),
+        where("email", "==", email)
+      );
+      const emailSnapshot = await getDocs(emailQuery);
+
+      if (!emailSnapshot.empty) {
+        setError(
+          "That email is already in use. Do you already have an account?"
+        );
+        return;
+      }
+
+      // Check if username already exists
+      const usernameQuery = query(
+        collection(db, "users"),
+        where("displayName", "==", username)
+      );
+      const usernameSnapshot = await getDocs(usernameQuery);
+
+      if (!usernameSnapshot.empty) {
+        setError("Username is already taken. Please choose another one.");
+        return;
+      }
+
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         email,
@@ -149,6 +183,9 @@ export default function SignupPage() {
                   Create account
                 </button>
               </div>
+              {error && (
+                <p className="mt-4 text-center text-sm text-red-500">{error}</p>
+              )}
             </form>
             {/*
             ////////////////////////////
