@@ -6,7 +6,7 @@
 
 This is a full-stack web-app boilerplate starter.
 
-This is a [Next.js 14](https://nextjs.org/) web-app using the `app directory`, [Tailwind CSS](https://tailwindcss.com/), TypeScript, Google's [Firebase](https://firebase.google.com/) SDK and [Zustand](https://docs.pmnd.rs/zustand/getting-started/introduction) for state management.
+This is a [Next.js](https://nextjs.org/) web-app using the `app directory`, [Tailwind CSS](https://tailwindcss.com/), TypeScript, Google's [Firebase](https://firebase.google.com/) SDK and [Zustand](https://docs.pmnd.rs/zustand/getting-started/introduction) for state management.
 
 ## 🔔 Features
 
